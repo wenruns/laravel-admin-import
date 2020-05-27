@@ -1,0 +1,32 @@
+{
+  "name": "wenruns/grid",
+  "description": "Solution to the problem of insufficient memory when the exported data is too large.",
+  "license": "MIT",
+  "homepage": "https://github.com/wenruns/wen-grid.git",
+  "keywords": [
+    "导出",
+    "内存不足",
+    "grid组件",
+    "grid",
+    "组件",
+    "Export",
+    "Out of memory",
+    "Grid component",
+    "Grid",
+    "Component"
+  ],
+  "authors": [
+    {
+      "name": "wenruns",
+      "email": "1562194488@qq.com"
+    }
+  ],
+  "require": {
+    "maatwebsite/excel": "~2.1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Wenruns\\Grid\\": "src/"
+    }
+  }
+}
