@@ -2,23 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="67a08bfc-69b4-4415-a6eb-9e692dcfcb75" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lang/en.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lang/zh-CN.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/BatchTools.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/CreateBtn.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ExcelProvider.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ExcelService.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ExcelServiceApp.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Response.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Sales/FormatInterface.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Sales/FormatService.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Sales/ImportService.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ShowLayer.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/commission/CommissionService.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -115,12 +99,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1590557555830</updated>
-      <workItem from="1590557557154" duration="1250000" />
+      <workItem from="1590557557154" duration="2085000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1250000" />
+    <option name="totallyTimeSpent" value="2085000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
