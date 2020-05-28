@@ -70,18 +70,53 @@ class Example extends Controller
         $excelService->setAbnormalConditions([
             'where' => ['system', 'unlink']
         ]);
+        // 设置失败列表展示字段
         $excelService->setErrHeader([
-            'period_number' => '银行贷款编号',
-            'custom_name' => '客户名称',
-            'trade_amount' => '支用累计',
-            'trade_date' => '支用月份',
-//            'import_date' => '导入时间',
-            'err_msg' => '信息',
+            'field1' => 'title1',
+            'field2' => 'title2',
+            'field3' => 'title3',
+            'field4' => 'title4',
         ]);
+        // 列表展示Grid
         $excelService->gridFun(array($this, 'importGrid'));
+        // 导入文件输入框
         $excelService->formFunDown(array($this, 'importForm'));
+        // 显示
         return $excelService->render();
     }
+    
+    /**
+     * 导入列表
+     * @param Grid $grid
+     */
+    public function importGrid(Grid $grid)
+    {
+        $grid->model()
+            ->whereNull('deleted_at')
+            ->orderBy('id', 'desc');
+        $grid->id("ID");
+        $grid->field1('客户名称');
+        $grid->field2('银行贷款编号');
+        $grid->field3('支用累计');
+        $grid->field4('支用月份');
+        $grid->err_msg("结果");
+    }
+    
+     /**
+      * 导入表单
+      * @param Form $form
+      */
+    public function importForm(Form $form)
+    {
+        $form->html("*1.导入时请使用规定版式的xls/xlsx后缀文件，<a target='_blank' href='" . route('admin.bank_sale.downloadTpl') . "'>模板文件下载</a><br>
+    *2.确保excel表中数据无误<br>
+    *3.第一行的列名请勿做任何修改，否则无法正常匹配，已致影响正常导入");
+        $form->tools(function (Form\Tools $tools) {
+            $tools->disableList();
+            $tools->append('<a href="' . route('admin.bank_sale.list') . '" class="btn btn-sm btn-default" title="列表"><i class="fa fa-list"></i><span class="hidden-xs">&nbsp;列表</span></a>');
+        });
+    }
+
 
 }
 ```
