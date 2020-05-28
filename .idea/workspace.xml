@@ -1,18 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="67a08bfc-69b4-4415-a6eb-9e692dcfcb75" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/example/ExampleService.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/example/ExampleService.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/import/BatchTools.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/import/BatchTools.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/import/CreateBtn.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/import/CreateBtn.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/import/ExcelProvider.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/import/ExcelProvider.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/import/ExcelService.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/import/ExcelService.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/import/ExcelServiceApp.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/import/ExcelServiceApp.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/import/Response.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/import/Response.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/import/ShowLayer.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/import/ShowLayer.php" afterDir="false" />
-    </list>
+    <list default="true" id="67a08bfc-69b4-4415-a6eb-9e692dcfcb75" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,7 +16,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/composer.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="350">
+            <state relative-caret-position="550">
               <caret line="22" column="21" selection-start-line="22" selection-start-column="7" selection-end-line="22" selection-end-column="21" />
             </state>
           </provider>
@@ -63,8 +52,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/example/ExampleService.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="643">
-              <caret line="156" column="5" selection-start-line="156" selection-start-column="5" selection-end-line="156" selection-end-column="5" />
+            <state relative-caret-position="125">
+              <caret line="40" column="47" selection-start-line="40" selection-start-column="38" selection-end-line="40" selection-end-column="47" />
               <folding>
                 <element signature="e#144#182#0#PHP" expanded="true" />
               </folding>
@@ -114,7 +103,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/import/ShowLayer.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
+            <state relative-caret-position="-225">
               <caret line="8" column="30" selection-start-line="8" selection-start-column="30" selection-end-line="8" selection-end-column="30" />
             </state>
           </provider>
@@ -230,7 +219,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="10802000" />
+    <option name="totallyTimeSpent" value="11056000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -263,20 +252,6 @@
     <option name="version" value="1" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/composer.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="350">
-          <caret line="22" column="21" selection-start-line="22" selection-start-column="7" selection-end-line="22" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/import/ShowLayer.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="8" column="30" selection-start-line="8" selection-start-column="30" selection-end-line="8" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/import/ExcelService.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-600">
@@ -337,10 +312,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/composer.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="550">
+          <caret line="22" column="21" selection-start-line="22" selection-start-column="7" selection-end-line="22" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/import/ShowLayer.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-225">
+          <caret line="8" column="30" selection-start-line="8" selection-start-column="30" selection-end-line="8" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/example/ExampleService.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="643">
-          <caret line="156" column="5" selection-start-line="156" selection-start-column="5" selection-end-line="156" selection-end-column="5" />
+        <state relative-caret-position="125">
+          <caret line="40" column="47" selection-start-line="40" selection-start-column="38" selection-end-line="40" selection-end-column="47" />
           <folding>
             <element signature="e#144#182#0#PHP" expanded="true" />
           </folding>
