@@ -19,11 +19,15 @@ use App\Models\ImportSalesDataLog;
 use App\Models\LoanForm;
 use Encore\Admin\Facades\Admin;
 
-class CommissionService extends ExcelService
+class ExampleService extends ExcelService
 {
+    /**
+     * @param $data
+     * @return array|bool
+     * @throws \Exception
+     */
     public function format($data)
     {
-//        try {
         // TODO: Implement format() method.
         $formatData = $this->parseData($data);
         if ($formatData === false) {
@@ -59,9 +63,6 @@ class CommissionService extends ExcelService
         return [
             $key_name => $formatData,
         ];
-//        } catch (\Exception $e) {
-//            dd($e);
-//        }
     }
 
     protected function parseData($data)
@@ -86,6 +87,10 @@ class CommissionService extends ExcelService
         return $formatData;
     }
 
+    /**
+     * @param $formatData
+     * @return mixed
+     */
     protected function initData($formatData)
     {
         $unique = md5(json_encode($formatData));
@@ -102,7 +107,10 @@ class CommissionService extends ExcelService
         return $formatData;
     }
 
-    public function setHeader(): array
+    /**
+     * @return array
+     */
+    public function setHeader()
     {
         // TODO: Implement setHeader() method.
         return [

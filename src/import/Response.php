@@ -6,7 +6,7 @@
  * Time: 14:09
  */
 
-namespace App\Admin\Services\Excel;
+namespace Wenruns\Excel\import;
 
 
 class Response

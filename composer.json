@@ -1,19 +1,13 @@
 {
-  "name": "wenruns/grid",
-  "description": "Solution to the problem of insufficient memory when the exported data is too large.",
+  "name": "wenruns/laravel-admin-import",
+  "description": "Based on a component written by laravel-admin, the main function is to facilitate the laravel project development excel file import function.",
   "license": "MIT",
-  "homepage": "https://github.com/wenruns/wen-grid.git",
+  "homepage": "https://github.com/wenruns/laravel-admin-import.git",
   "keywords": [
-    "导出",
-    "内存不足",
-    "grid组件",
-    "grid",
-    "组件",
-    "Export",
-    "Out of memory",
-    "Grid component",
-    "Grid",
-    "Component"
+    "laravel-admin",
+    "import",
+    "excel",
+    "导入"
   ],
   "authors": [
     {
@@ -26,7 +20,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Wenruns\\Grid\\": "src/"
+      "Wenruns\\Excel\\": "src/"
     }
   }
 }

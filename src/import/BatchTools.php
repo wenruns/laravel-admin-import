@@ -1,5 +1,6 @@
 <?php
-namespace App\Admin\Services\Excel;
+
+namespace Wenruns\Excel\import;
 
 use Encore\Admin\Grid\Tools\BatchAction;
 
@@ -31,7 +32,6 @@ class BatchTools extends BatchAction
     protected $request_method = '';
 
 
-
     const BATCH_DELETE = 1;  // 批量删除
 
 
@@ -47,7 +47,7 @@ class BatchTools extends BatchAction
     public function __construct($options)
     {
         $this->action = isset($options['action']) ? $options['action'] : 1;
-        $this->url = isset($options['url']) && $options['url'] ? $options['url'] : $this->resource.'/delete';
+        $this->url = isset($options['url']) && $options['url'] ? $options['url'] : $this->resource . '/delete';
         $this->suc_tips = isset($options['success_text']) ? $options['success_text'] : '操作成功！';
         $this->err_tips = isset($options['err_text']) ? $options['err_text'] : '操作失败！';
         $this->request_method = isset($options['method']) && $options['method'] ? $options['method'] : 'post';

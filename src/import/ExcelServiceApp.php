@@ -6,7 +6,7 @@
  * Time: 15:42
  */
 
-namespace App\Admin\Services\Excel;
+namespace Wenruns\Excel\import;
 
 
 use App\Http\Controllers\Controller;

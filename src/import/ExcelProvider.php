@@ -7,7 +7,7 @@
  * maatwebsite v ~2.1.0
  */
 
-namespace App\Admin\Services\Excel;
+namespace Wenruns\Excel\import;
 
 
 use Illuminate\Support\Facades\DB;
@@ -215,7 +215,7 @@ class ExcelProvider
     public static function throwException($message)
     {
         if (!self::$_exceptions || empty(self::$_exceptions)) {
-            self::$_exceptions = require(__DIR__ . '.');
+            self::$_exceptions = require(__DIR__ . 'src');
         }
         if (isset(self::$_exceptions[self::$_lang][$message])) {
             throw new \Exception(self::$_exceptions[self::$_lang][$message]);
