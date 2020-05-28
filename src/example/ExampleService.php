@@ -9,7 +9,6 @@
 namespace App\Admin\Services\Excel\commission;
 
 
-use App\Admin\Services\Excel\ExcelService;
 use App\Admin\Services\Excel\Response;
 use App\Admin\Services\Excel\ShowLayer;
 use App\Models\Bank;
@@ -18,6 +17,7 @@ use App\Models\ImportSalesCommissionLog;
 use App\Models\ImportSalesDataLog;
 use App\Models\LoanForm;
 use Encore\Admin\Facades\Admin;
+use Wenruns\Excel\import\ExcelService;
 
 class ExampleService extends ExcelService
 {
@@ -110,9 +110,9 @@ class ExampleService extends ExcelService
     /**
      * @return array
      */
-    public function setHeader()
+    public function header()
     {
-        // TODO: Implement setHeader() method.
+        // TODO: Implement header() method.
         return [
             'custom_name' => '姓名',
             'period_number' => '银行贷款编码',
@@ -151,53 +151,9 @@ class ExampleService extends ExcelService
             ];
             ImportSalesDataLog::insert($logData);
         }
-
-        $success = count($response->getSuccessData());
-        $fail = count($response->getErrorData());
-        $repeat = count($response->getExistData());
-        $content = <<<THML
-<table style="border: 1px solid pink;width: 100%;">
-    <tr style="border: 1px solid pink">
-       <td style="padding: 5px; text-align: center;width: 50%;">成功</td>
-       <td style="padding: 5px; text-align: center;width: 50%;">{$success}条</td>
-    </tr>
-    <tr style="border: 1px solid pink">
-       <td style="padding: 5px; text-align: center;width: 50%;">失败</td>
-       <td style="padding: 5px; text-align: center;width: 50%;">{$fail}条</td>
-    </tr>
-    <tr>
-       <td style="padding: 5px; text-align: center;width: 50%;">重复</td>
-       <td style="padding: 5px; text-align: center;width: 50%;">{$repeat}条</td>
-    </tr>
-</table>
-THML;
-        (new ShowLayer([
-            'title' => '导入结果',
-            'type' => 'success',
-            'content' => $content,
-            'showCancelButton' => false,
-            'confirmButtonText' => '知道了',
-        ]))->render();
     }
 
     public function failCallback(Response $response)
     {
-        $result = $response->getResult();
-        $reason = $result['errMsg'];
-        $content = <<<HTML
-<table style="border: 1px solid pink;width: 100%;">
-    <tr style="border: 1px solid pink">
-        <td style="padding: 5px; text-align: center;width: 60px; border-right: 1px solid pink;">原因</td>
-        <td style="padding: 5px; text-align: left;">{$reason}</td>
-    </tr>
-</table>
-HTML;
-        (new ShowLayer([
-            'title' => '导入失败',
-            'content' => $content,
-            'showCancelButton' => false,
-            'confirmButtonText' => '知道了',
-            'type' => 'error',
-        ]))->render();
     }
 }

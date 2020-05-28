@@ -6,7 +6,7 @@
  * Time: 14:49
  */
 
-namespace Wenruns\Excel\import;
+namespace App\Admin\Services\Excel;
 
 
 class ShowLayer
@@ -72,7 +72,6 @@ class ShowLayer
 
     protected function showLayer()
     {
-        $type = $this->iconType;
         return <<<EOT
 <section class="wen-tips-layer-box">
     <style>

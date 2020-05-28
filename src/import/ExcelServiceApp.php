@@ -6,7 +6,7 @@
  * Time: 15:42
  */
 
-namespace Wenruns\Excel\import;
+namespace App\Admin\Services\Excel;
 
 
 use App\Http\Controllers\Controller;
@@ -26,6 +26,9 @@ class ExcelServiceApp extends Controller
 
     use HasResourceActions;
 
+    /**
+     * @var ExcelService
+     */
     protected $importService = null; // 导入数据处理类实例
     protected $model = null; // 模型
 
@@ -41,10 +44,6 @@ class ExcelServiceApp extends Controller
     protected $headerUrl = '#';  // header对应的路由
 
     protected $description = ''; // 描述
-
-    protected $actionUrl = ''; // 表单提交url
-
-    protected $errHeader = []; // 错误数据显示头信息
 
     protected $batchDelete = false; // 是否显示批量删除
 
@@ -62,7 +61,7 @@ class ExcelServiceApp extends Controller
 
     protected $_importIdsSessionIndex = '__wen_import_ids';
 
-    protected $_responseSessionIndex = 'wen_response_session';
+//    protected $_responseSessionIndex = 'wen_response_session';
 
 
     protected $exportFormat = null;
@@ -82,12 +81,13 @@ class ExcelServiceApp extends Controller
     {
     }
 
-    public static $_requireExportWen = true;
-
-
     public function setPrefix($index)
     {
-        $this->_responseSessionIndex = $index . '_' . $this->_responseSessionIndex;
+        $this->_functions[] = [
+            'method' => 'setSessionPrefix',
+            'params' => [$index]
+        ];
+//        $this->_responseSessionIndex = $index . '_' . $this->_responseSessionIndex;
         $this->_errorDataSessionIndex = $index . '_' . $this->_errorDataSessionIndex;
         $this->_importIdsSessionIndex = $index . '_' . $this->_importIdsSessionIndex;
         return $this;
@@ -149,7 +149,7 @@ class ExcelServiceApp extends Controller
         if (!is_array($headers)) {
             throw new \Exception('setErrHeader需要传入一个数组作为参数，当前参数类型为' . gettype($headers));
         }
-        $this->errHeader = $headers;
+        $this->importService->errHeader($headers);
         return $this;
     }
 
@@ -172,7 +172,7 @@ class ExcelServiceApp extends Controller
      */
     public function setAction(string $url)
     {
-        $this->actionUrl = $url;
+        $this->importService->url($url);
         return $this;
     }
 
@@ -248,6 +248,7 @@ class ExcelServiceApp extends Controller
     public function setExcelService(ExcelService $excelService)
     {
         $this->importService = $excelService;
+//        $this->model = $excelService->model();
         return $this;
     }
 
@@ -319,7 +320,6 @@ class ExcelServiceApp extends Controller
     public function showErrData($res)
     {
         $abnormal_data = [];
-        $this->errTableHeader();
         if ((\request('op') == 'import'
                 || !$this->importService->checkCommit())
             && (!empty($res['errorData'])
@@ -329,6 +329,7 @@ class ExcelServiceApp extends Controller
         if ($error_data = session($this->_errorDataSessionIndex)) {
             $abnormal_data = array_merge($error_data, $abnormal_data);
         }
+
         session([$this->_errorDataSessionIndex => $abnormal_data]);
         $data = [];
         // 由于页面空间有限，只显示一下三个主要字段， headers顺序必须和展示字段顺序相同
@@ -337,26 +338,25 @@ class ExcelServiceApp extends Controller
         $total = 0;
         foreach ($abnormal_data as $key => $value) {
             if (!empty($value)) {
-                $total += count($value);
+                $n = count($value);
+                $total += $n;
                 foreach ($value as $ky => $item) {
-                    $item = $this->importService->failData($item);
-                    foreach ($this->errHeader as $field => $title) {
-                        if (!isset($item[$field])) {
-                            continue;
-                        }
-                        if ($index == 0) {
-                            $headers[] = $title;
-                        }
-                        $data[$index][$field] = $item[$field];
+                    try {
+                        $this->formatErrorData($headers, $data, $item, $index);
+                        $index++;
+                    } catch (\Exception $e) {
+                        $total--;
+                        $n--;
+                        continue;
+                    }
+                }
+                if ($this->_divisionError && $n > 0) {
+                    foreach ($this->importService->getErrHeader() as $field => $title) {
+                        $data[$index][$field] = empty($this->_divisionSymbol) ? '--(' . $n . ')--' : $this->_divisionSymbol . '(' . $n . ')' . $this->_divisionSymbol;
                     }
                     $index++;
                 }
-                if ($this->_divisionError) {
-                    foreach ($this->errHeader as $field => $title) {
-                        $data[$index][$field] = empty($this->_divisionSymbol) ? '--(' . count($value) . ')--' : $this->_divisionSymbol . '(' . count($value) . ')' . $this->_divisionSymbol;
-                    }
-                    $index++;
-                }
+
             }
         }
         if (empty($headers)) {
@@ -364,12 +364,32 @@ class ExcelServiceApp extends Controller
         }
         // 表格展示失败的数据
         $table = new Table($headers, $data);
+
         $box = new Box('导入失败的数据（共' . $total . '条记录）', $table->render());
 
         $box->collapsable();
         // 保存导入失败的数据到session中，用于后面导出功能
         return $box;
     }
+
+    /**
+     * 格式化
+     * @param $headers
+     * @param $data
+     * @param $item
+     * @param $index
+     */
+    protected function formatErrorData(&$headers, &$data, $item, $index)
+    {
+        $item = $this->importService->failData($item);
+        foreach ($this->importService->getErrHeader() as $field => $title) {
+            if ($index == 0) {
+                $headers[] = $title;
+            }
+            $data[$index][$field] = $item[$field];
+        }
+    }
+
 
     /**
      * 显示导入页面
@@ -392,11 +412,10 @@ class ExcelServiceApp extends Controller
             $breadcrumb[] = ['text' => $this->header, 'url' => $this->headerUrl];
         }
         $breadcrumb[] = ['text' => '报表导入'];
-        if (\request('op') == 'import' && session($this->_responseSessionIndex)) {
-            $res = $this->importService->saveAllByCustomer($this->getResponseFromSession());
+        if (\request('op') == 'import' && $response = $this->getResponseFromSession()) {
+            $res = $this->importService->saveAllByCustomer($response);
         } else {
             $res = $this->importService->saveAll();
-            $this->checkCustomerChoice();
         }
         return $content->header($this->header ? $this->header : '报表导入')
             ->description($this->description ? $this->description : '导入数据列表')
@@ -417,456 +436,26 @@ class ExcelServiceApp extends Controller
      */
     protected function getResponseFromSession()
     {
-        $response = unserialize(session($this->_responseSessionIndex));
-        session([$this->_responseSessionIndex => '']);
-        $types = explode('.', \request('types'));
-        foreach ($types as $type) {
-            switch ($type) {
-                case 'abnormal':
-                    $response->setSuccessData(array_merge($response->getSuccessData(), $response->getErrorData()));
-                    $response->setErrorData([]);
-                    break;
-                case 'repeat':
-                    $response->setSuccessData(array_merge($response->getSuccessData(), $response->getExistData()));
-                    $response->setExistData([]);
-                    break;
-                default:
+        $response = $this->importService->getResponseFromSession();
+        if ($response) {
+            $types = explode('.', \request('types'));
+            foreach ($types as $type) {
+                switch ($type) {
+                    case 'abnormal':
+                        $response->setSuccessData(array_merge($response->getSuccessData(), $response->getErrorData()));
+                        $response->setErrorData([]);
+                        break;
+                    case 'repeat':
+                        $response->setSuccessData(array_merge($response->getSuccessData(), $response->getExistData()));
+                        $response->setExistData([]);
+                        break;
+                    default:
+                }
             }
         }
         return $response;
     }
 
-    /**
-     * 检测是否做出反应
-     */
-    protected function checkCustomerChoice()
-    {
-        if ($this->importService->checkCommit()) {
-            session([$this->_responseSessionIndex => serialize($this->importService->_response)]);
-            $content = $this->showCustomerHtml();
-            $url = $this->makeUrl('op=import');
-            (new ShowLayer([
-                'title' => '数据监测结果',
-                'content' => $content,
-                'width' => '1000px',
-                'confirmButtonText' => '继续导入',
-                'cancelButtonText' => '取消导入',
-            ]))->then("function(isConfirm){
-                if(isConfirm.value){
-                    let url = '{$url}';
-                    let param = '';
-                    document.querySelectorAll('.import-options').forEach(function(item, dex){
-                        if (item.checked) {
-                            param += item.value + '.';
-                        }
-                    });
-                    url += '&types=' + param;
-                    window.location.href = url;
-                }
-            }")->render();
-        }
-    }
-
-    /**
-     * 显示重复信息和异常信息
-     * @return string
-     */
-    protected function showCustomerHtml()
-    {
-        $errData = $this->importService->_response->getErrorData();
-        $existData = $this->importService->_response->getExistData();
-        $data = $this->importService->_response->getSuccessData();
-        $errCount = count($errData);
-        $existCount = count($existData);
-        $dataCount = count($data);
-        $totalCount = $errCount + $existCount + $dataCount;
-
-        $errPercent = ($errCount / ($existCount + $errCount + $dataCount) * 10000) / 100;
-        $exitPercent = ($existCount / ($existCount + $errCount + $dataCount) * 10000) / 100;
-
-
-        return <<<HTML
-    <div id="wen-import-data">
-        <style>
-            #wen-import-data table{
-                width:100%; 
-                border:1px solid;
-                font-size: 1em;
-            }
-            #wen-import-data td{
-                border:1px solid #000000;
-                padding: 5px;
-            }
-            #wen-import-data .table-list{
-                height: 60vh;
-                overflow: auto;
-            }
-        </style>
-        <table>
-            <tr>
-                <td colspan="8">一共导入{$totalCount}条记录</td>
-            </tr>
-            <tr>
-                {$this->abnormalInfo($errCount, $errPercent)}
-                {$this->repeatInfo($existCount, $exitPercent)}
-            </tr>
-            <tr>
-                {$this->abnormalButton()}
-                {$this->repeatButton()}
-            </tr>
-            <tr>
-                <td colspan="8">
-                    {$this->abnormalTable($errData)}
-                    {$this->repeatTable($existData)}
-                </td>
-            </tr>
-            <tr>
-                <td colspan="8" style="text-align: center">
-                    <span><input class="import-options" type="checkbox" name="type[]" value="normal" checked disabled>正常数据</span>
-                    {$this->abnormalCheckedBox()}
-                    {$this->repeatCheckedBox()}
-                </td>
-            </tr>
-        </table>
-    </div>
-    <script >
-        let obj = document.querySelectorAll('.wen-import-button');
-        obj.forEach(function(element, dex){
-            element.addEventListener("click", function(e){
-                obj.forEach(function(item){
-                    item.style.background = "#FFD1A4";
-                    item.style.color = "#000000";
-                });
-                e.target.style.background = "#FF8000";
-                e.target.style.color = "#ffffff";
-                document.querySelectorAll(".table-list").forEach(function(item){
-                    item.style.display = "none";
-                })
-                document.querySelector(".table-list-" + e.target.dataset.flag).style.display = "block";
-            });
-        });
-    </script>
-HTML;
-    }
-
-    /**
-     * 判断是否允许插入重复数据
-     * @return mixed
-     */
-    protected function checkRepeat()
-    {
-        return $this->importService->insertWithExistData();
-    }
-
-
-    /**
-     * 重复信息
-     * @param $existCount
-     * @param $exitPercent
-     * @return string
-     */
-    protected function repeatInfo($existCount, $exitPercent)
-    {
-        if ($this->checkRepeat()) {
-            return '';
-        }
-        return <<<HTML
-    <td style="border:1px solid #000000;padding: 5px;">重复</td>
-    <td style="border:1px solid #000000;padding: 5px;">{$existCount}条</td>
-    <td style="border:1px solid #000000;padding: 5px;">重复率</td>
-    <td style="border:1px solid #000000;padding: 5px;">{$exitPercent}%</td>
-HTML;
-
-    }
-
-    /**
-     * 重复按钮
-     * @return string
-     */
-    protected function repeatButton()
-    {
-        if ($this->checkRepeat()) {
-            return '';
-        }
-        $style = 'background: #FFD1A4;color: #000000;';
-        if ($this->checkAbnormal()) {
-            $style = 'background: #FF8000;color: #FFFFFF;';
-        }
-        return <<<HTML
-<td colspan="4" style="border:1px solid #000000;padding: 5px; cursor: pointer;{$style}" class="wen-import-button" data-flag="repeat">重复数据</td>
-HTML;
-
-    }
-
-    /**
-     * 重复数据复选框
-     * @return string
-     */
-    protected function repeatCheckedBox()
-    {
-        if ($this->checkRepeat()) {
-            return '';
-        }
-        return <<<HTML
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<span><input class="import-options" type="checkbox" name="type[]" value="repeat">重复数据</span>
-HTML;
-
-    }
-
-    /**
-     * 重复数据列表
-     * @param $existData
-     * @return string
-     */
-    protected function repeatTable($existData)
-    {
-        if ($this->checkRepeat()) {
-            return '';
-        }
-        $display = 'display: none;';
-        if ($this->checkAbnormal()) {
-            $display = '';
-        }
-        $tableExist = $this->makeTable($existData);
-        return <<<HTML
-<div class="table-list table-list-repeat" style="{$display}">
-    {$tableExist}
-</div>
-HTML;
-
-    }
-
-    /**
-     * 判断是否允许插入异常数据
-     * @return mixed
-     */
-    protected function checkAbnormal()
-    {
-        return $this->importService->insertWithErrorData();
-    }
-
-    /**
-     * 异常信息
-     * @param $errCount
-     * @param $errPercent
-     * @return string
-     */
-    protected function abnormalInfo($errCount, $errPercent)
-    {
-        if ($this->checkAbnormal()) {
-            return '';
-        }
-        return <<<HTML
-    <td style="border:1px solid #000000;padding: 5px;">异常</td>
-    <td style="border:1px solid #000000;padding: 5px;">{$errCount}条</td>
-    <td style="border:1px solid #000000;padding: 5px;">异常率</td>
-    <td style="border:1px solid #000000;padding: 5px;">{$errPercent}%</td>
-HTML;
-
-    }
-
-    /**
-     * 异常按钮
-     * @return string
-     */
-    protected function abnormalButton()
-    {
-        if ($this->checkAbnormal()) {
-            return '';
-        }
-        return <<<HTML
-<td colspan="4" style="border:1px solid #000000;padding: 5px; background: #FF8000;color: #FFFFFF;cursor: pointer;" class="wen-import-button" data-flag="abnormal">异常数据</td>
-HTML;
-
-    }
-
-    /**
-     * 异常数据列表
-     * @param $errData
-     * @return string
-     */
-    protected function abnormalTable($errData)
-    {
-        if ($this->checkAbnormal()) {
-            return '';
-        }
-        $tableError = $this->makeTable($errData);
-        return <<<HTML
-<div class="table-list table-list-abnormal">
-    {$tableError}
-</div>
-HTML;
-
-    }
-
-
-    /**
-     * 异常数据复选框
-     * @return string
-     */
-    protected function abnormalCheckedBox()
-    {
-        if ($this->checkAbnormal()) {
-            return '';
-        }
-        return <<<HTML
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<span><input class="import-options" type="checkbox" name="type[]" value="abnormal">异常数据</span>
-HTML;
-
-    }
-
-    /**
-     * 生成数据列表
-     * @param $data
-     * @return string
-     */
-    protected function makeTable($data)
-    {
-        $key = mt_rand(0, 9999);
-        $perPage = 20;
-        $header = $header = $this->errHeader;
-        if (empty($header)) {
-            $header = $this->importService->setHeader();
-        };
-        $theadHtml = '';
-        foreach ($header as $key => $title) {
-            $theadHtml .= '<th>' . $title . '</th>';
-        }
-        $tbodyHtml = '';
-        foreach ($data as $key => $item) {
-            $item = $this->importService->failData($item);
-            if ($key < $perPage) {
-                $tbodyHtml .= '<tr>';
-                foreach ($header as $field => $title) {
-                    if (!isset($item[$field])) {
-                        $item[$field] = "undefined '$field'";
-                    }
-                    $tbodyHtml .= '<td>' . $item[$field] . '</td>';
-                }
-                $tbodyHtml .= '</tr>';
-            }
-            $data[$key] = $item;
-        }
-        $colspan = count($header);
-
-        $total = ceil(count($data) / $perPage);
-        $pageHtml = '';
-        for ($i = 1; $i <= $total; $i++) {
-            if ($i == 1) {
-                $pageHtml .= "<li data-page='$i' class='page-choose'>$i</li>";
-            } else {
-                $pageHtml .= "<li data-page='$i'>$i</li>";
-            }
-        }
-        $data = json_encode($data);
-        $header = json_encode($header);
-        return <<<HTML
-<style>
-    .table-list-content-{$key}{
-        width: 100%;
-        font-size: 1em !important;
-        border: 1px solid #000000;
-    }
-    .table-list-content-{$key} td,.table-list-content-{$key} th{
-        text-align: center;
-        border: 1px solid #000000;
-        padding: 5px;
-    }
-   .table-list-content-{$key} .table-list-page{
-        display: flex;
-        padding: 0px;
-        margin: 0px;
-        justify-content: flex-end;
-        align-items: center;
-   }
-   .table-list-content-{$key} .table-list-page li{
-        list-style: none;
-        width: 30px;
-        height: 30px;
-        padding: 0px;
-        margin: 0px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 1px solid #F0F0F0;
-        cursor: pointer;
-   }
-   .table-list-content-{$key} .table-list-page li:hover{
-        border: 1px solid #2894FF;
-        background: #66B3FF;
-   }
-   .table-list-content-{$key} .page-choose{
-        background: #66B3FF;
-        border: 1px solid #2894FF !important;
-   }
-</style>
-<table class="table-list-content-{$key}">
-    <thead id="table-list-id-{$key}">
-        <tr>
-            {$theadHtml}
-        </tr>    
-    </thead>
-    <tbody class="table-list-{$key}">
-        {$tbodyHtml}
-    </tbody>
-    <tr>
-        <td colspan="{$colspan}">
-            <ul class="table-list-page">
-                {$pageHtml}
-            </ul>
-            <a href="#table-list-id-{$key}" id="table-tbody-position-{$key}"></a>
-        </td>
-    </tr>
-</table>
-<script>
-    let pages_{$key} = document.querySelectorAll('.table-list-content-{$key} .table-list-page li');
-    pages_{$key}.forEach(function(item, index) {
-        item.addEventListener('click', function(e) {
-            pages_{$key}.forEach(function(obj, dex) {
-                obj.classList.remove('page-choose')
-            });
-            e.target.classList.add('page-choose');
-            makePageContent{$key}(e.target.dataset.page)
-        })
-    })
-    
-    function makePageContent{$key}(page){
-        let data = $data;
-        let perPage = $perPage;
-        let header = $header;
-        
-        let start = (page-1) * perPage;
-        let end = page * perPage;
-        let htmlStr = '';
-        for (; start < end; start++) {
-            htmlStr += '<tr>';
-            for(var index in header){
-                if(!data[start]){
-                    break;
-                }
-                if(!data[start][index]){
-                    data[start][index] = "undefined '" + index + "'";
-                }
-                htmlStr += '<td>' + data[start][index] + '<\/td>';
-            }
-            htmlStr += '<\/tr>';
-        }
-        document.querySelector('.table-list-{$key}').innerHTML = htmlStr;
-        document.querySelector('#table-tbody-position-{$key}').click();
-    }
-</script>
-HTML;
-    }
-
-
-    protected function showImportResult($result)
-    {
-        if (empty($result['data']) && empty($result['err_data']) && empty($result['exist_data'])) {
-            return;
-        }
-    }
 
     /**
      * 调用excel服务提供者的方法
@@ -937,23 +526,6 @@ HTML;
 
 
     /**
-     * 初始化导入错误列表信心
-     */
-    protected function errTableHeader()
-    {
-        if (empty($this->errHeader)) {
-            $i = 0;
-            foreach ($this->importService->setHeader() as $field => $title) {
-                $this->errHeader[$field] = $title;
-                $i++;
-                if ($i > 2) {
-                    break;
-                }
-            }
-        }
-    }
-
-    /**
      * 导入表单，上传xlxs文件
      * @param $res
      * @return Form
@@ -994,30 +566,9 @@ HTML;
      */
     protected function makeUrl($params)
     {
-        if (empty($this->actionUrl)) {
-            $url = \request()->getUri();
-            if (strpos($url, 'op=') !== false) {
-                $url = mb_substr($url, 0, strpos($url, 'op='));
-            }
-        } else {
-            $url = $this->actionUrl;
-        }
-        if (empty($params)) {
-            return $url;
-        }
-
-        if (is_array($params)) {
-            $http_params = http_build_query($params);
-        } else {
-            $http_params = $params;
-        }
-        if (strpos($url, '?') === false) {
-            $url .= "?$http_params";
-        } else {
-            $url .= "&$http_params";
-        }
-        return $url;
+        return $this->importService->makeUrl($params);
     }
+
 
     public function enableInsertWithErrorData($enable = true)
     {
@@ -1037,6 +588,10 @@ HTML;
         return $this;
     }
 
+    /**
+     * @param bool $enable
+     * @return $this
+     */
     public function enableInsertWithCustomerChoice($enable = true)
     {
         $this->_functions[] = [
@@ -1062,14 +617,14 @@ HTML;
         if (is_callable($this->gridFun)) {
             call_user_func($this->gridFun, $grid, $res);
         } else {
-            foreach ($this->importService->setHeader() as $field => $title) {
+            foreach ($this->importService->header() as $field => $title) {
                 $grid->$field($title);
             }
         }
         // 添加两个自定义按钮
         $grid->tools(function ($tools) {
-            $excelBody = json_encode(array_keys($this->importService->setHeader()));
-            $excelHead = json_encode(array_values($this->importService->setHeader()));
+            $excelBody = json_encode(array_keys($this->importService->header()));
+            $excelHead = json_encode(array_values($this->importService->header()));
             $elementId = [
                 'wen-export-abnormal',
                 'wen-export-delete',

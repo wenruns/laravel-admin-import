@@ -21,47 +21,67 @@ ____________________
     laravel-admin版本号：1.6.10
     php版本号：7+
     maatwebsite/excel版本号：~2.1.0
+    注意：需要开启session
 
 3、安装
 ----------------------------------------------
 ```angular2
-
+composer require wenruns/laravel-admin-import
 ```
-
-
-方法介绍
+4、使用教程
 ----------------------------------------------
-a）setImport方法和setExport方法
-    作用：该方法用于设置导入数据时的一些配置参数和回调方法。
-    参数：ExcelPrivider $excel 一个excel导出实例对象
-    ExcelPrivider对象拥有以下方法：
-        1)setFormat
-            作用：设置导入数据格式化回调，导入之前调用该方法设置的回调方法格式化数据；
-            参数：function $func 格式化数据的回调方法，该方法将接收一个参数，导入的数据集合$data
-        2)setTable
-            作用：设置需要导入的数据表名
-            参数：string $table
-        3)setDb
-            作用：设置需要导入的数据库连接信息
-            参数：string $db
-        4)setFailCallback
-            作用：设置导入数据库失败时的回调方法，插入数据失败时调用
-            参数：function $func 该方法接收一个参数，导入失败的数据集合$data
-        5)setExportFileName
-            作用：设置导出的文件名称
-            参数：string $name
-        6)setExportData
-            作用：设置导出的数据集合
-            参数：array $data
-        7)setExportFormat
-            作用：设置导出前格式化数据的回到方法
-            参数：function $func 该方法将接收一个数据集合
-        8)setExportType
-            作用：设置导出的文件类型
-            参数：string $type
-        9)setHeader
-             作用：设置内容的标题栏，即数据集合每一列的名称
-             参数：array $head
-###b）makeResponse方法
-    作用：该方法用于自定义导入时的返回结果集合
-    参数：array $res 导入数据库的结果
+- 控制器（Example.php）
+```
+namespace  App\Admin\Controllers;
+
+use App\Http\Controllers\Controller;
+
+class Example extends Controller 
+{
+    /**
+     * 导入
+     * @param ExcelServiceApp $excelService
+     * @return Content
+     * @throws \Exception
+     */
+    public function import(ExcelServiceApp $excelService)
+    {
+        $this->checkResult();
+        $model = new ImportSalesData();
+        // 实例化逻辑层服务
+        $importService = new ImportService($model);
+        // 设置（注册）逻辑层服务
+        $excelService->setExcelService($importService);
+        // 应用层服务
+        $excelService->header('交易记录');
+        // 设置模型
+        $excelService->setModel($model);
+        // 设置导入错误数据的分割
+        $excelService->divisionError();
+        // 设置导入列表的宽度
+        $excelService->setListWidth(8);
+        // 设置允许导入错误数据
+//        $excelService->enableInsertWithErrorData();
+        // 设置允许用户选择性导入
+        $excelService->enableInsertWithCustomerChoice();
+        // 隐藏异常数据删除按钮
+        $excelService->disableAbnormalDeleteButton();
+        // 设置异常数据的判断条件
+        $excelService->setAbnormalConditions([
+            'where' => ['system', 'unlink']
+        ]);
+        $excelService->setErrHeader([
+            'period_number' => '银行贷款编号',
+            'custom_name' => '客户名称',
+            'trade_amount' => '支用累计',
+            'trade_date' => '支用月份',
+//            'import_date' => '导入时间',
+            'err_msg' => '信息',
+        ]);
+        $excelService->gridFun(array($this, 'importGrid'));
+        $excelService->formFunDown(array($this, 'importForm'));
+        return $excelService->render();
+    }
+
+}
+```
