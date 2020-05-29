@@ -7,7 +7,7 @@
  * maatwebsite v ~2.1.0
  */
 
-namespace App\Admin\Services\Excel;
+namespace Wenruns\Excel\import;
 
 
 use Illuminate\Support\Facades\DB;
@@ -21,10 +21,37 @@ class ExcelProvider
     const DATA_SAVE_SUCCESS_CODE = 200; // 数据保存数据库成功
     const DATA_SAVE_CUSTOMER_CODE = 300; // 用户手动选择导入数据
 
-    protected $_data = [];  // 导入数据集合
+    /**
+     * 导入数据集合
+     * @var array
+     */
+    protected $_data = [];
+
+    /**
+     * 导入数据处理服务器
+     * @var ExcelService|null
+     */
     protected $_excelService = null;
 
+    /**
+     * 响应对象
+     * @var Response|null
+     */
     protected $_response = null;
+
+
+    /**
+     * 异常信息列表
+     * @var array
+     */
+    protected static $_exceptions = [];
+
+    /***
+     * 语言
+     * @var string
+     */
+    protected static $_lang = 'zh-CN';
+
 
     public function __construct(ExcelService $excelService)
     {
@@ -56,8 +83,6 @@ class ExcelProvider
         }
         return $this;
     }
-
-//    protected function
 
 
     /**
@@ -99,23 +124,21 @@ class ExcelProvider
 
 
     /**
-     * 保存数据
+     * 保存数据——第一次导入请求触发
      * @throws \Exception
      */
     public function saveAll()
     {
-
-        if (empty($this->_data)) {
+        if (empty($this->_response->getFilesInfo())) {
             return;
         }
-        if (count($this->_data) == count($this->_data, 1)) {
-            $this->_response->setResult(
-                $this->_excelService->makeResponse([
-                    'status' => true,
-                    'code' => self::DATA_SAVE_CUSTOMER_CODE,
-                    'errMsg' => '导入文件格式出错，只有一维数组',
-                    'res' => [],
-                ]));
+        if (empty($this->_data) || count($this->_data) == count($this->_data, 1)) {
+            $this->_response->setResult([
+                'status' => false,
+                'code' => self::DATA_SAVE_FAILED_CODE,
+                'errMsg' => '导入文件数据格式出错，数据解析失败！',
+                'res' => [],
+            ]);
             return;
         }
         DB::beginTransaction();
@@ -131,46 +154,40 @@ class ExcelProvider
                     break;
                 }
             }
-            if (!$this->_excelService->checkCommit()) {
-                DB::commit();
-            }
-        } catch (\Exception $e) {
-            DB::rollBack();
-            if (!empty($this->_response->getSuccessData())) {
-                $this->_response->setErrorData($this->_response->getSuccessData(), true);
-            }
-            $this->_response->setSuccessData([])
-                ->setResult(
-                    $this->_excelService->makeResponse([
-                        'status' => false,
-                        'code' => self::DATA_SAVE_FAILED_CODE,
-                        'errMsg' => $e->getMessage(),
-                        'res' => [],
-                    ]));
-            method_exists($this->_excelService, 'failCallback') && $this->_excelService->failCallback($this->_response);
-            return;
-        }
-        if ($this->_excelService->checkCommit()) {
-            $this->_response->setResult(
-                $this->_excelService->makeResponse([
+            if ($this->_excelService->checkCommit()) {
+                $this->_response->setResult([
                     'status' => true,
                     'code' => self::DATA_SAVE_CUSTOMER_CODE,
                     'errMsg' => 'Choose the data to insert by customer!',
                     'res' => [],
-                ]));
-        } else {
-            $this->_response->setResult(
-                $this->_excelService->makeResponse([
+                ]);
+            } else {
+                DB::commit();
+                $this->_response->setResult([
                     'status' => true,
                     'code' => self::DATA_SAVE_SUCCESS_CODE,
                     'errMsg' => 'ok',
                     'res' => $res,
-                ]));
-            method_exists($this->_excelService, 'successCallback') && $this->_excelService->successCallback($this->_response);
+                ]);
+                method_exists($this->_excelService, 'successCallback') && $this->_excelService->successCallback($this->_response);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->_response->setErrorData($this->_response->getSuccessData(), true)
+                ->setSuccessData([])
+                ->setResult([
+                    'status' => false,
+                    'code' => self::DATA_SAVE_FAILED_CODE,
+                    'errMsg' => $e->getMessage(),
+                    'res' => [],
+                ]);
+            method_exists($this->_excelService, 'failCallback') && $this->_excelService->failCallback($this->_response);
         }
-
     }
 
+    /**
+     * 保存数据——客户选择性导入（第二次导入请求触发，在第一次请求的基础上）
+     */
     public function saveAllByCustomer()
     {
         $data = $this->_excelService->_response->getSuccessData();
@@ -182,43 +199,50 @@ class ExcelProvider
                 $res[] = $this->_excelService->model()->insertGetId($item);
             }
             DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $this->_response->setErrorData($this->_response->getSuccessData(), true)
-                ->setSuccessData([])
-                ->setResult(
-                    $this->_excelService->makeResponse([
-                        'status' => false,
-                        'code' => self::DATA_SAVE_FAILED_CODE,
-                        'errMsg' => $e->getMessage(),
-                        'res' => [],
-                    ]));
-            method_exists($this->_excelService, 'failCallback') && $this->_excelService->failCallback($this->_response);
-            return;
-        }
-        $this->_response->setResult(
-            $this->_excelService->makeResponse([
+            $this->_response->setResult([
                 'status' => true,
                 'code' => self::DATA_SAVE_SUCCESS_CODE,
                 'errMsg' => 'ok',
                 'res' => $res,
-            ]));
-        method_exists($this->_excelService, 'successCallback') && $this->_excelService->successCallback($this->_response);
+            ]);
+            method_exists($this->_excelService, 'successCallback') && $this->_excelService->successCallback($this->_response);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->_response->setErrorData($this->_response->getSuccessData(), true)
+                ->setSuccessData([])
+                ->setResult([
+                    'status' => false,
+                    'code' => self::DATA_SAVE_FAILED_CODE,
+                    'errMsg' => $e->getMessage(),
+                    'res' => [],
+                ]);
+            method_exists($this->_excelService, 'failCallback') && $this->_excelService->failCallback($this->_response);
+        }
+
     }
 
+    /**
+     * 设置语言
+     * @param $lang
+     */
+    public static function setLang($lang)
+    {
+        self::$_lang = $lang;
+    }
 
     /**
      * 抛出异常
      * @param $message
+     * @param $lang
      * @throws \Exception
      */
     public static function throwException($message)
     {
-        if (!self::$_exceptions || empty(self::$_exceptions)) {
-            self::$_exceptions = require(__DIR__ . '.');
+        if (empty(self::$_exceptions) && is_file(__DIR__ . '/lang/' . self::$_lang . '.php')) {
+            self::$_exceptions = require(__DIR__ . '/lang/' . self::$_lang . '.php');
         }
-        if (isset(self::$_exceptions[self::$_lang][$message])) {
-            throw new \Exception(self::$_exceptions[self::$_lang][$message]);
+        if (isset(self::$_exceptions[$message])) {
+            throw new \Exception(self::$_exceptions[$message]);
         } else {
             throw new \Exception($message);
         }

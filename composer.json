@@ -1,0 +1,26 @@
+{
+  "name": "wenruns/laravel-admin-import",
+  "description": "Based on a component written by laravel-admin, the main function is to facilitate the laravel project development excel file import function.",
+  "license": "MIT",
+  "homepage": "https://github.com/wenruns/laravel-admin-import.git",
+  "keywords": [
+    "laravel-admin",
+    "import",
+    "excel",
+    "导入"
+  ],
+  "authors": [
+    {
+      "name": "wenruns",
+      "email": "1562194488@qq.com"
+    }
+  ],
+  "require": {
+    "maatwebsite/excel": "~2.1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Wenruns\\Excel\\": "src/"
+    }
+  }
+}

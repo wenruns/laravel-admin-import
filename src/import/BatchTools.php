@@ -1,5 +1,5 @@
 <?php
-namespace App\Admin\Services\Excel;
+namespace Wenruns\Excel\import;
 
 use Encore\Admin\Grid\Tools\BatchAction;
 
