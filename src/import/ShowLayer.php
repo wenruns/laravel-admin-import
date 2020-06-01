@@ -6,7 +6,7 @@
  * Time: 14:49
  */
 
-namespace Wenruns\Excel\import;
+namespace Wenruns\Import;
 
 
 class ShowLayer

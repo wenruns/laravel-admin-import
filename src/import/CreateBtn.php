@@ -24,7 +24,7 @@
  *       selectRows：true或者false，true表示将选中行的id追加到url后面
  */
 
-namespace Wenruns\Excel\import;
+namespace Wenruns\Import;
 
 
 class CreateBtn

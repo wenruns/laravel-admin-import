@@ -6,11 +6,11 @@
  * Time: 15:05
  */
 
-namespace App\Admin\Services\Excel\commission;
+namespace Wenruns\Example;
 
 
-use Wenruns\Excel\import\ExcelService;
-use Wenruns\Excel\import\Response;
+use Wenruns\Import\ExcelService;
+use Wenruns\Import\Response;
 
 class ExampleService extends ExcelService
 {

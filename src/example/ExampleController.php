@@ -6,14 +6,11 @@
  * Time: 14:27
  */
 
-namespace Wenruns\Excel\example;
+namespace Wenruns\Example;
 
-use App\Admin\Services\Excel\commission\ExampleService;
-use App\Http\Controllers\Controller;
-use Wenruns\Excel\import\ExcelServiceApp;
-use Encore\Admin\Grid;
-use Encore\Admin\Form;
 
+
+use Wenruns\Import\ExcelServiceApp;
 
 class ExampleController extends Controller
 {

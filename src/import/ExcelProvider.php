@@ -7,7 +7,7 @@
  * maatwebsite v ~2.1.0
  */
 
-namespace Wenruns\Excel\import;
+namespace Wenruns\Import;
 
 
 use Illuminate\Support\Facades\DB;

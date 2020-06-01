@@ -6,7 +6,7 @@
  * Time: 14:13
  */
 
-namespace Wenruns\Excel\import;
+namespace Wenruns\Import;
 
 
 use Illuminate\Database\Eloquent\Model;

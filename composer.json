@@ -20,7 +20,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Wenruns\\Excel\\": "src/"
+      "Wenruns\\Import\\": "src/import",
+      "Wenruns\\Example\\": "src/example"
     }
   }
 }

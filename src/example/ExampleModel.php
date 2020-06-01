@@ -7,7 +7,7 @@
  * Time: 14:35
  */
 
-namespace Wenruns\Excel\example;
+namespace Wenruns\Example;
 
 use Illuminate\Database\Eloquent\Model;
 
