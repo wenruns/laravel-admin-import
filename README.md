@@ -40,14 +40,11 @@ composer require wenruns/laravel-admin-import
  * Time: 14:27
  */
 
-namespace Wenruns\Excel\example;
+namespace Wenruns\Example;
 
-use App\Admin\Services\Excel\commission\ExampleService;
-use App\Http\Controllers\Controller;
-use Wenruns\Excel\import\ExcelServiceApp;
-use Encore\Admin\Grid;
-use Encore\Admin\Form;
 
+
+use Wenruns\Import\ExcelServiceApp;
 
 class ExampleController extends Controller
 {
@@ -103,11 +100,11 @@ class ExampleController extends Controller
  * Time: 15:05
  */
 
-namespace App\Admin\Services\Excel\commission;
+namespace Wenruns\Example;
 
 
-use Wenruns\Excel\import\ExcelService;
-use Wenruns\Excel\import\Response;
+use Wenruns\Import\ExcelService;
+use Wenruns\Import\Response;
 
 class ExampleService extends ExcelService
 {
