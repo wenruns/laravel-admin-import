@@ -352,7 +352,9 @@ class ExcelServiceApp extends Controller
                 }
                 if ($this->_divisionError && $n > 0) {
                     foreach ($this->importService->getErrHeader() as $field => $title) {
-                        $data[$index][$field] = empty($this->_divisionSymbol) ? '--(' . $n . ')--' : $this->_divisionSymbol . '(' . $n . ')' . $this->_divisionSymbol;
+                        $data[$index][$field] = empty($this->_divisionSymbol) ? '--(' . $n . ')--'
+                            : (is_callable($this->_divisionSymbol) ? call_user_func($this->_divisionSymbol, $value)
+                                : $this->_divisionSymbol);
                     }
                     $index++;
                 }
