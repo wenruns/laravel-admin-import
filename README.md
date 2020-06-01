@@ -26,7 +26,7 @@ ____________________
 3、安装
 ----------------------------------------------
 ```angular2
-composer require wenruns/laravel-admin-import
+composer require laravel-admin-components/import
 ```
 4、使用教程
 ----------------------------------------------
