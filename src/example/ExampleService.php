@@ -9,20 +9,26 @@
 namespace App\Admin\Services\Excel\commission;
 
 
-use App\Admin\Services\Excel\Response;
-use App\Admin\Services\Excel\ShowLayer;
-use App\Models\Bank;
-use App\Models\ImportSalesCommission;
-use App\Models\ImportSalesCommissionLog;
-use App\Models\ImportSalesDataLog;
-use App\Models\LoanForm;
-use Encore\Admin\Facades\Admin;
-use Wenruns\Excell\ExcelService;
+use Wenruns\Excel\import\ExcelService;
+use Wenruns\Excel\import\Response;
 
 class ExampleService extends ExcelService
 {
+
+    public function header()
+    {
+        // TODO: Implement header() method.
+        return [
+            'field1' => '标题1',
+            'field2' => '标题2',
+            'field3' => '标题3',
+            'field4' => '标题4',
+        ];
+    }
+
     /**
-     * @param $data
+     * 格式化导入的数据
+     * @param $data 导入数据
      * @return array|bool
      * @throws \Exception
      */
@@ -38,6 +44,7 @@ class ExampleService extends ExcelService
 
 
     /**
+     * 导入成功回调
      * @param Response $response
      */
     public function successCallback(Response $response)
@@ -45,6 +52,10 @@ class ExampleService extends ExcelService
 
     }
 
+    /**
+     * 导入失败回调
+     * @param Response $response
+     */
     public function failCallback(Response $response)
     {
     }

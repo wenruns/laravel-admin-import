@@ -229,16 +229,16 @@ class ExcelServiceApp extends Controller
         return $this;
     }
 
-    /**
-     * 设置模型
-     * @param Model $model
-     * @return $this
-     */
-    public function setModel(Model $model)
-    {
-        $this->model = $model;
-        return $this;
-    }
+//    /**
+//     * 设置模型
+//     * @param Model $model
+//     * @return $this
+//     */
+//    public function setModel(Model $model)
+//    {
+//        $this->model = $model;
+//        return $this;
+//    }
 
     /**
      * 设置excel服务提供者
@@ -248,7 +248,7 @@ class ExcelServiceApp extends Controller
     public function setExcelService(ExcelService $excelService)
     {
         $this->importService = $excelService;
-//        $this->model = $excelService->model();
+        $this->model = $excelService->model();
         return $this;
     }
 
@@ -399,11 +399,7 @@ class ExcelServiceApp extends Controller
     public function render()
     {
         $this->operate();
-        if (empty($this->model) && empty($this->importService)) {
-            throw new \Exception('请设置模型和Excel服务提供者。');
-        } else if (empty($this->model)) {
-            throw new \Exception('请设置模型。');
-        } else if (empty($this->importService)) {
+        if (empty($this->importService)) {
             throw new \Exception('请设置Excel服务提供者。');
         }
         $this->callFunction();
