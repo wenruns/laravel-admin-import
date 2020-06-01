@@ -1,5 +1,5 @@
 {
-  "name": "wenruns/laravel-admin-components/import",
+  "name": "laravel-admin-components/import",
   "description": "Based on a component written by laravel-admin, the main function is to facilitate the laravel project development excel file import function.",
   "license": "MIT",
   "homepage": "https://github.com/wenruns/laravel-admin-import.git",
